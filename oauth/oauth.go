@@ -23,15 +23,12 @@ const (
 )
 
 var (
-	oauthSec     []byte
-	userTokenSec []byte
-	expDura      time.Duration
+	oauthSec      = []byte("00000000")
+	userTokenSec  = []byte("00000001")
+	expDura       = 1 * time.Minute
 )
 
-func StartServer(lis net.Listener, oauthTokenSec, loginSec string, loginExpDura time.Duration) {
-	oauthSec = []byte(oauthTokenSec)
-	userTokenSec = []byte(loginSec)
-	expDura = loginExpDura
+func StartServer() {
 	manager := manage.NewDefaultManager()
 	manager.SetAuthorizeCodeTokenCfg(manage.DefaultAuthorizeCodeTokenCfg)
 
@@ -85,8 +82,11 @@ func StartServer(lis net.Listener, oauthTokenSec, loginSec string, loginExpDura 
 	http.HandleFunc("/test", hdl.testHandler)
 
 	http.HandleFunc("/revoke", hdl.revokeHandler)
-	err := http.Serve(lis, nil)
+	lis, err := net.Listen("tcp", ":9096")
 	if err != nil {
+		panic(err)
+	}
+	if err := http.Serve(lis, nil); err != nil {
 		panic(err)
 	}
 }
