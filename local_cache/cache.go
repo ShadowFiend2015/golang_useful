@@ -45,7 +45,7 @@ func (c *Cache) checkExpired(e *list.Element, force bool) bool {
 		c.bucket.Delete(entry.Key)
 		return true
 	}
-	c.lru.l.MoveToBack(e)
+	c.lru.l.MoveToFront(e)
 	return false
 }
 
@@ -88,22 +88,37 @@ func (c *Cache) Contains(key string) bool {
 	return !c.checkExpired(e, false)
 }
 
+func (c *Cache) LRURange(f func(v interface{}) bool) {
+	for tmp := c.lru.l.Front(); tmp != nil; tmp = tmp.Next() {
+		entry, ok := tmp.Value.(*Entry)
+		if !ok {
+			continue
+		}
+		if !f(entry.Value) {
+			break
+		}
+	}
+}
+
 func (c *Cache) Set(key string, value interface{}, duration time.Duration) error {
 	if c.lru == nil {
 		return errors.New("uninitialized")
 	}
 
 	if v, ok := c.bucket.Load(key); ok {
-		e, _ := v.(list.Element)
+		e, _ := v.(*list.Element)
 		if entry, ok := e.Value.(*Entry); ok {
 			entry.Value = value
 			entry.Expiration = time.Now().Add(duration).Unix()
+			c.checkExpired(e, false)
 			return nil
 		}
 	}
 
 	entry := &Entry{Key: key, Value: value, Expiration: time.Now().Add(duration).Unix()}
+	c.lru.Lock()
 	e := c.lru.l.PushFront(entry)
+	c.lru.Unlock()
 	c.bucket.Store(key, e)
 
 	if c.lru.l.Len() > c.Cap {

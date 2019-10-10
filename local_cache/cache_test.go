@@ -44,3 +44,24 @@ func TestGet(t *testing.T) {
 		}
 	}
 }
+
+func TestSetExist(t *testing.T) {
+	for _, v := range cacheTestData {
+		if err := cacheObj.Set(v.key, v.value, v.duration); err != nil {
+			t.Errorf("set key[%s] error - %v", v.key, err)
+		}
+	}
+	cacheObj.LRURange(func(v interface{}) bool {
+		data := v.(cacheData)
+		fmt.Printf("id[%d], name[%s]\n", data.id, data.name)
+		return true
+	})
+	if err := cacheObj.Set(cacheTestData[0].key, cacheTestData[0].value, cacheTestData[0].duration); err != nil {
+		t.Errorf("set key[%s] error - %v", cacheTestData[0].key, err)
+	}
+	cacheObj.LRURange(func(v interface{}) bool {
+		data := v.(cacheData)
+		fmt.Printf("id[%d], name[%s]\n", data.id, data.name)
+		return true
+	})
+}
