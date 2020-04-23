@@ -12,7 +12,7 @@ import (
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/oauth2.v3/utils/uuid"
 
-	log "git.sogou-inc.com/Sogou-AI-Cloud/aitools/logger"
+	log "logger"
 )
 
 // Handler oauth2.0对应各个url的handler

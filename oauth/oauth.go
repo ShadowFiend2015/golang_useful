@@ -14,7 +14,7 @@ import (
 	"gopkg.in/oauth2.v3/server"
 	"gopkg.in/oauth2.v3/store"
 
-	log "git.sogou-inc.com/Sogou-AI-Cloud/aitools/logger"
+	log "logger"
 )
 
 const (
@@ -23,9 +23,9 @@ const (
 )
 
 var (
-	oauthSec      = []byte("00000000")
-	userTokenSec  = []byte("00000001")
-	expDura       = 1 * time.Minute
+	oauthSec     = []byte("00000000")
+	userTokenSec = []byte("00000001")
+	expDura      = 1 * time.Minute
 )
 
 func StartServer() {
